@@ -22,6 +22,35 @@ COMMAND_END = [2, 51, 1]
 
 s = None
 
+mirror_chars = {
+    'a': 'ɒ',
+    'b': 'd',
+    'c': 'ɔ',
+    'd': 'b',
+    'e': 'ɘ',
+    'f': 'ʇ',
+    'g': 'ϱ',
+    'h': 'ʜ',
+    'i': 'i',
+    'j': 'į',
+    'k': 'ʞ',
+    'l': 'l',
+    'm': 'm',
+    'n': 'n',
+    'o': 'o',
+    'p': 'q',
+    'q': 'p',
+    'r': 'ɿ',
+    's': 'ƨ',
+    't': 'Ɉ',
+    'u': 'u',
+    'v': 'v',
+    'w': 'w',
+    'x': 'x',
+    'y': 'y',
+    'z': 'z',
+}
+
 def send_command(command):
     if s:
         # Send the command
@@ -53,6 +82,25 @@ def send_text(text, speed, mode):
 
     send_command(COMMAND_END)    
 
+# Send the mirrored equivalent of a text to LED badge
+def send_mirror_text(text, speed, mode):
+    if text == '':
+        return
+
+    mirrored_text = ''
+    for char in text:
+        mirrored_text += mirror_chars[char]
+
+    send_text(mirrored_text, speed, mode)
+
+@begin.subcommand
+@begin.convert(speed=int)
+def mirror_text(text, speed=5, mode='B'):
+    "Display mirrored text on the LED screen"
+    logging.info("Writing mirror of '{}' to display".format(text))
+    send_mirror_text(text, speed, mode)
+    logging.info("Done")
+
 @begin.subcommand
 @begin.convert(speed=int)
 def text(text, speed=5, mode='B'):
@@ -77,5 +125,3 @@ def run(serial_port='/dev/tty.usbserial'):
         logging.info("Opened serial port '{}'".format(serial_port))
     except OSError as e:
         logging.error(e)
-
-
